@@ -12,7 +12,7 @@ class CameraOpenCV : public QObject
 {
     Q_OBJECT
 public:
-    explicit CameraOpenCV(const QString& deviceName, QThread *thread = nullptr);
+    explicit CameraOpenCV(const QString& device, const QString& format, const QString& resolution, const QString& framerate, QThread *thread = nullptr);
     ~CameraOpenCV();
 
 signals:

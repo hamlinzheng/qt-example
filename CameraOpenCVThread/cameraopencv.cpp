@@ -1,11 +1,19 @@
 #include "cameraopencv.h"
 
-CameraOpenCV::CameraOpenCV(const QString& deviceName, QThread *thread)
+CameraOpenCV::CameraOpenCV(const QString& device, const QString& format, const QString& resolution, const QString& framerate, QThread *thread)
 {
-    // TODO: Configure camera parameters
+    QStringList resList = resolution.split("*");
+    if (resList.size() != 2) {
+        qWarning() << "CameraOpenCV: Invalid resolution format. Expected 'width*height'.";
+        exit(1);
+    }
+    QString width = resList[0];
+    QString height = resList[1];
     
-    std::string pipeline = "v4l2src device=/dev/video0 min-buffers=2 io-mode=mmap ! video/x-raw,format=NV12,width=1280,height=720,framerate=25/1 ! videoconvert ! video/x-raw,format=BGR ! appsink drop=true sync=false";
-    // std::string pipeline = "v4l2src device=/dev/video0 ! video/x-raw,format=NV12,width=1280,height=720,framerate=25/1 ! appsink";
+    // std::string pipeline = "v4l2src device=/dev/video0 min-buffers=2 io-mode=mmap ! video/x-raw,format=NV12,width=1280,height=720,framerate=25/1 ! videoconvert ! video/x-raw,format=BGR ! appsink drop=true sync=false";
+    std::string pipeline = "v4l2src device=" + device.toStdString() + " min-buffers=2 io-mode=mmap ! \
+                            video/x-raw,format=" + format.toStdString() + ",width=" + width.toStdString() + ",height=" + height.toStdString() + ",framerate=" + framerate.toStdString() + "/1" + " ! \
+                            videoconvert ! video/x-raw,format=BGR ! appsink drop=true sync=false";
     cap.open(pipeline, cv::CAP_GSTREAMER);
     // cap.open(0, cv::CAP_V4L2);
     if (cap.isOpened()) {
@@ -13,7 +21,7 @@ CameraOpenCV::CameraOpenCV(const QString& deviceName, QThread *thread)
     }
     else
     {
-        qWarning() << "CameraOpenCV: Can't open camera " << deviceName;
+        qWarning() << "CameraOpenCV: Can't open camera " << device;
         exit(1);
     }
 

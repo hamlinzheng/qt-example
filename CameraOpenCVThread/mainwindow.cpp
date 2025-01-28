@@ -7,12 +7,16 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     qRegisterMetaType<cv::Mat>("cv::Mat");
+    // Set environment variable GST_VIDEO_CONVERT_USE_RGA=1
+    qputenv("GST_VIDEO_CONVERT_USE_RGA", "1");
+    // Set environment variable GST_VIDEO_FLIP_USE_RGA=1
+    qputenv("GST_VIDEO_FLIP_USE_RGA", "1");
 
     qDebug() << "MainWindow thread: " << QThread::currentThreadId();
 
     QThread* thread = new QThread;
     // Using OpenCV capture
-    m_cameraOpenCV = new CameraOpenCV(QString("/dev/video0"), thread);
+    m_cameraOpenCV = new CameraOpenCV("/dev/video0", "NV12", "1280*720", "25", thread);
     // connect(m_cameraOpenCV, &CameraOpenCV::frameReady, this, &MainWindow::onCvFrameReady);
     connect(m_cameraOpenCV, &CameraOpenCV::imageReady, this, &MainWindow::onImageReady);
 
